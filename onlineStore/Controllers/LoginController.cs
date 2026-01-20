@@ -7,5 +7,8 @@ namespace onlineStore.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
+        public LoginController()
+        {
+        }
     }
 }
