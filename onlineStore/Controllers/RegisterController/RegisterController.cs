@@ -15,9 +15,9 @@ namespace onlineStore.Controllers.RegisterController
             _registerService = registerService;
         }
         [HttpPost("/register")]
-        public async Task<IActionResult> RegisterUser(Register register)
+        public  async Task<ActionResult<Register>> RegisterUser(Register register)
         {
-            var newUser = await _registerService.RegisterUser(register);
+            var newUser = await  _registerService.RegisterUser(register);
             return Ok(newUser);
         }
     }
