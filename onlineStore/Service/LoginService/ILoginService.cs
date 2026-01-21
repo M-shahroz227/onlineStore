@@ -1,6 +1,9 @@
-﻿namespace onlineStore.Service.LoginService
+﻿using onlineStore.DTO.LoginDto;
+
+namespace onlineStore.Service.LoginService
 {
-    public class ILoginService
+    public interface ILoginService
     {
+        Task<string> LoginAsync(LoginDto dto);
     }
 }

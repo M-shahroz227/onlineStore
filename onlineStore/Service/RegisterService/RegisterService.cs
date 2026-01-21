@@ -23,9 +23,9 @@ namespace onlineStore.Service.RegisterService
             var newUser = new Register
             {
                 Username = register.Username,
-                Password = register.Password,
                 Email = register.Email,
-                PhoneNumber = register.PhoneNumber
+                PhoneNumber = register.PhoneNumber,
+                Password = BCrypt.Net.BCrypt.HashPassword(register.Password)
             };
             _context.registers.Add(newUser);
             await _context.SaveChangesAsync();

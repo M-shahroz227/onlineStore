@@ -4,6 +4,8 @@ namespace onlineStore.Model
 {
     public class Register
     {
+        
+
         [Key]
         public int Id { get; set; }
         [Required]
