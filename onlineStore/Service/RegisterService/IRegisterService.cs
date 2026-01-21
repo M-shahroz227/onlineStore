@@ -1,6 +1,9 @@
-﻿namespace onlineStore.Service.RegisterService
+﻿using onlineStore.Model;
+
+namespace onlineStore.Service.RegisterService
 {
-    public class IRegisterService
+    public interface IRegisterService
     {
+        Task<Register> RegisterUser(Register register);
     }
 }
