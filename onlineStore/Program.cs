@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using onlineStore.Data;
 using onlineStore.Service.JwtService;
 using onlineStore.Service.LoginService;
+using onlineStore.Service.ProductService;
 using onlineStore.Service.RegisterService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<StoreDbContext>(options =>
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 // jwt Authentication
 builder.Services.AddAuthentication(options =>
 {
