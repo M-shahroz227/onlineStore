@@ -10,7 +10,7 @@ namespace onlineStore.Service.ProductService
         Task<ProductDto> GetProductByIdAsync(string productId);
         Task<ProductDto> AddProductAsync(ProductDto productDto);
         Task<ProductDto> UpdateProductAsync(int id, ProductDto updatedProductDto);
-        Task<ProductDto> DeleteProductAsync(int id);
+        Task<bool> DeleteProductAsync(int id);
 
     }
 }

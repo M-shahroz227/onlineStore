@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using onlineStore.Service.ProductService;
 using onlineStore.DTO.ProductDto;
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace onlineStore.Controllers.ProductController
@@ -12,96 +11,74 @@ namespace onlineStore.Controllers.ProductController
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+
         public ProductController(IProductService productService)
         {
             _productService = productService;
         }
 
-        // GET: api/Product
-        [HttpGet]
-        public async Task<ActionResult> GetAllProducts()
+        // -------------------- READ ALL --------------------
+        // GET: api/Product/getAll
+        [HttpGet("getAll")]
+        public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
-            try
-            {
-                var products = await _productService.GetAllProductsAsync();
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var products = await _productService.GetAllProductsAsync();
+            return Ok(products);
         }
 
-        // GET: api/Product/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetProductById(int id)
+        // -------------------- READ BY ID --------------------
+        // GET: api/Product/getById/1
+        [HttpGet("getById/{id}")]
+        public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
-            try
-            {
-                var product = await _productService.GetProductByIdAsync(id);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-                return Ok(product);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var product = await _productService.GetProductByIdAsync(id);
+            if (product == null)
+                return NotFound(new { message = "Product not found" });
+
+            return Ok(product);
         }
 
-        // POST: api/Product
-        [HttpPost]
-        public async Task<ActionResult> AddProduct([FromBody] ProductDto productDto)
+        // -------------------- CREATE --------------------
+        // POST: api/Product/add
+        [HttpPost("add")]
+        public async Task<ActionResult<ProductDto>> AddProduct([FromBody] ProductDto productDto)
         {
-            try
-            {
-                var addedProduct = await _productService.AddProductAsync(productDto);
-                return CreatedAtAction(nameof(GetProductById), new { id = addedProduct.Id }, addedProduct);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if (productDto == null)
+                return BadRequest();
+
+            var createdProduct = await _productService.AddProductAsync(productDto);
+
+            return CreatedAtAction(
+                nameof(GetProductById),
+                new { id = createdProduct.Id },
+                createdProduct
+            );
         }
 
-        // PUT: api/Product/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductDto productDto)
+        // -------------------- UPDATE --------------------
+        // PUT: api/Product/update/1
+        [HttpPut("update/{id}")]
+        public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
-            try
-            {
-                var updatedProduct = await _productService.UpdateProductAsync(id, productDto);
-                if (updatedProduct == null)
-                {
-                    return NotFound();
-                }
-                return Ok(updatedProduct);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var updatedProduct = await _productService.UpdateProductAsync(id, productDto);
+
+            if (updatedProduct == null)
+                return NotFound(new { message = "Product not found" });
+
+            return Ok(updatedProduct);
         }
 
-        // DELETE: api/Product/{id}
-        [HttpDelete("{id}")]
+        // -------------------- DELETE --------------------
+        // DELETE: api/Product/delete/1
+        [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            try
-            {
-                var isDeleted = await _productService.DeleteProductAsync(id);
-                if (!isDeleted)
-                {
-                    return NotFound();
-                }
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var isDeleted = await _productService.DeleteProductAsync(id);
+
+            if (!isDeleted)
+                return NotFound(new { message = "Product not found" });
+
+            return NoContent(); // 204
         }
     }
 }
