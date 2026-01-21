@@ -10,7 +10,8 @@ namespace onlineStore.Data
         {  
         }
        public DbSet<Register> registers { get; set; }
-         public DbSet<Login> logins { get; set; }
+        public DbSet<Login> logins { get; set; }
+        public DbSet<Product> products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
