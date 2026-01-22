@@ -3,11 +3,13 @@ using onlineStore.Service.ProductService;
 using onlineStore.DTO.ProductDto;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace onlineStore.Controllers.ProductController
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -40,6 +42,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- CREATE --------------------
         // POST: api/Product/add
+        [Authorize(Roles = "Admin")]
         [HttpPost("add")]
         public async Task<ActionResult<ProductDto>> AddProduct([FromBody] ProductDto productDto)
         {
@@ -57,6 +60,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- UPDATE --------------------
         // PUT: api/Product/update/1
+        [Authorize(Roles = "Admin")]
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
@@ -70,6 +74,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- DELETE --------------------
         // DELETE: api/Product/delete/1
+        [Authorize(Roles = "Admin")]
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {

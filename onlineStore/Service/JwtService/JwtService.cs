@@ -19,7 +19,8 @@ namespace onlineStore.Service.JwtService
             {
                 new Claim(ClaimTypes.NameIdentifier, register.Id.ToString()),
                 new Claim(ClaimTypes.Name, register.Username),
-                new Claim(ClaimTypes.Email, register.Email)
+                new Claim(ClaimTypes.Email, register.Email),
+                new Claim(ClaimTypes.Role, register.Role)
 
             };
             // token

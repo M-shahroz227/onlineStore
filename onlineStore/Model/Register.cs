@@ -20,5 +20,8 @@ namespace onlineStore.Model
         [Required]
         [StringLength(15)]
         public string PhoneNumber { get; set; }
+
+        [Required]
+        public string Role { get; set; } = "user";
     }
 }
