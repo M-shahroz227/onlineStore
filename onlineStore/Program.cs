@@ -34,6 +34,13 @@ builder.Services.AddAuthentication(options =>
 
     };
 });
+// Authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("ProductReadPolicy", policy => policy.RequireRole("Admin","User"));
+    options.AddPolicy("ProductWritePolicy", policy => policy.RequireRole("Admin"));
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

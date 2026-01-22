@@ -21,6 +21,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- READ ALL --------------------
         // GET: api/Product/getAll
+        [Authorize(Policy ="ProductReadPolicy")]
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
@@ -30,6 +31,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- READ BY ID --------------------
         // GET: api/Product/getById/1
+        [Authorize(Policy = "ProductReadPolicy")]
         [HttpGet("getById/{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
@@ -42,7 +44,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- CREATE --------------------
         // POST: api/Product/add
-        [Authorize(Roles = "Admin")]
+        [Authorize (Policy = "AdminPolicy")]
         [HttpPost("add")]
         public async Task<ActionResult<ProductDto>> AddProduct([FromBody] ProductDto productDto)
         {
@@ -60,7 +62,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- UPDATE --------------------
         // PUT: api/Product/update/1
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
@@ -74,7 +76,7 @@ namespace onlineStore.Controllers.ProductController
 
         // -------------------- DELETE --------------------
         // DELETE: api/Product/delete/1
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
