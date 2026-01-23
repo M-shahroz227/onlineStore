@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using onlineStore.Service.ProductService;
 using onlineStore.DTO.ProductDto;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using onlineStore.Service.ProductService;
+using onlineStore.Authorization; // FeatureAuthorize attribute
 
-namespace onlineStore.Controllers.ProductController
+namespace onlineStore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -20,8 +17,7 @@ namespace onlineStore.Controllers.ProductController
         }
 
         // -------------------- READ ALL --------------------
-        // GET: api/Product/getAll
-        [Authorize(Policy ="ProductReadPolicy")]
+        [FeatureAuthorize("PRODUCT_READ")]
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
@@ -30,8 +26,7 @@ namespace onlineStore.Controllers.ProductController
         }
 
         // -------------------- READ BY ID --------------------
-        // GET: api/Product/getById/1
-        [Authorize(Policy = "ProductReadPolicy")]
+        [FeatureAuthorize("PRODUCT_READ")]
         [HttpGet("getById/{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
@@ -43,8 +38,7 @@ namespace onlineStore.Controllers.ProductController
         }
 
         // -------------------- CREATE --------------------
-        // POST: api/Product/add
-        [Authorize (Policy = "AdminPolicy")]
+        [FeatureAuthorize("PRODUCT_WRITE")]
         [HttpPost("add")]
         public async Task<ActionResult<ProductDto>> AddProduct([FromBody] ProductDto productDto)
         {
@@ -61,8 +55,7 @@ namespace onlineStore.Controllers.ProductController
         }
 
         // -------------------- UPDATE --------------------
-        // PUT: api/Product/update/1
-        [Authorize(Policy = "AdminPolicy")]
+        [FeatureAuthorize("PRODUCT_WRITE")]
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
@@ -75,8 +68,7 @@ namespace onlineStore.Controllers.ProductController
         }
 
         // -------------------- DELETE --------------------
-        // DELETE: api/Product/delete/1
-        [Authorize(Policy = "AdminPolicy")]
+        [FeatureAuthorize("PRODUCT_WRITE")]
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {

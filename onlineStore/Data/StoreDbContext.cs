@@ -15,6 +15,7 @@ namespace onlineStore.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RoleFeature> RoleFeatures { get; set; }
         public DbSet<UserFeature> UserFeatures { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

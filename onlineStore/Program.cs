@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using onlineStore.Authorization;
 using onlineStore.Data;
-using onlineStore.Service.JwtService;
-using onlineStore.Service.LoginService;
+using onlineStore.Service.Implementations;
+using onlineStore.Service.Interfaces;
 using onlineStore.Service.ProductService;
-using onlineStore.Service.RegisterService;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +15,8 @@ builder.Services.AddDbContext<StoreDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add services to the container.
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IRegisterService, RegisterService>();
-builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
+builder.Services.AddScoped<IFeatureService, FeatureService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 // jwt Authentication
 builder.Services.AddAuthentication(options =>
@@ -34,12 +36,16 @@ builder.Services.AddAuthentication(options =>
 
     };
 });
-// Authorization policies
+// features base policies
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("ProductReadPolicy", policy => policy.RequireRole("Admin","User"));
-    options.AddPolicy("ProductWritePolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("PRODUCT_READ",
+        policy => policy.Requirements.Add(
+            new FeatureRequirement("PRODUCT_READ")));
+
+    options.AddPolicy("PRODUCT_WRITE",
+        policy => policy.Requirements.Add(
+            new FeatureRequirement("PRODUCT_WRITE")));
 });
 
 builder.Services.AddControllers();

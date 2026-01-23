@@ -1,4 +1,4 @@
-﻿namespace onlineStore.Service.FeatureService
+﻿namespace onlineStore.Service.Interfaces
 {
     public interface IFeatureService
     {
