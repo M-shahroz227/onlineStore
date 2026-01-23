@@ -16,22 +16,23 @@ namespace onlineStore.Service.RegisterService
             _jwtService = jwtService;
         }
 
-        public async Task<RegisterDto> RegisterUser(Register dto)
+        public async Task<RegisterDto> RegisterUser(RegisterDto dto)
         {
-            if (_context.registers.Any(u => u.Username == dto.Username))
+            if (_context.Users.Any(u => u.Username == dto.Username))
             {
                 throw new Exception("Username already exists");
             }
 
-            var newUser = new Register
+            var newUser = new User
             {
                 Username = dto.Username,
                 Email = dto.Email,
+                Role = dto.Role,
                 PhoneNumber = dto.PhoneNumber,
                 Password = BCrypt.Net.BCrypt.HashPassword(dto.Password)
             };
 
-            _context.registers.Add(newUser);
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
             // Entity → DTO mapping

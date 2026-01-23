@@ -9,13 +9,23 @@ namespace onlineStore.Data
         public StoreDbContext(DbContextOptions<StoreDbContext> options) : base(options)
         {  
         }
-       public DbSet<Register> registers { get; set; }
-        public DbSet<Login> logins { get; set; }
-        public DbSet<Product> products { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Feature> Features { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<RoleFeature> RoleFeatures { get; set; }
+        public DbSet<UserFeature> UserFeatures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<UserRole>()
+                .HasKey(x => new { x.UserId, x.RoleId });
+
+            modelBuilder.Entity<RoleFeature>()
+                .HasKey(x => new { x.RoleId, x.FeatureId });
+
+            modelBuilder.Entity<UserFeature>()
+                .HasKey(x => new { x.UserId, x.FeatureId });
         }
     }
 }

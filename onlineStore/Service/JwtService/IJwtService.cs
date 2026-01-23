@@ -4,6 +4,6 @@ namespace onlineStore.Service.JwtService
 {
     public interface IJwtService
     {
-        string GenerateToken(Register register);
+        string GenerateToken(User register);
     }
 }

@@ -5,6 +5,6 @@ namespace onlineStore.Service.RegisterService
 {
     public interface IRegisterService
     {
-        Task<RegisterDto> RegisterUser(Register register);
+        Task<RegisterDto> RegisterUser(RegisterDto dto);
     }
 }

@@ -8,7 +8,7 @@ namespace onlineStore.Service.JwtService
 {
     public class JwtService : IJwtService
     {
-        public string GenerateToken(Register register)
+        public string GenerateToken(User register)
         {
             // key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsASecretKeyForJwtTokenGeneration"));
