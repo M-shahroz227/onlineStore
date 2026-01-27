@@ -7,6 +7,7 @@
 
         public int FeatureId { get; set; }
         public Feature Feature { get; set; } = null!;
-       
+
+        public bool IsEnabled { get; set; } = true; // 🔥 CONTROL HERE
     }
 }

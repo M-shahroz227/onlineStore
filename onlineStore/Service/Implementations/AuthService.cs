@@ -29,7 +29,9 @@ namespace onlineStore.Service.AuthService
             var user = new User
             {
                 UserName = dto.Username,
-                PasswordHash = dto.Password // Hash in real app
+                PasswordHash = dto.Password,
+                Role = dto.Role,
+
             };
 
             // Add features

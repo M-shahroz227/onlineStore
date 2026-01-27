@@ -119,6 +119,9 @@ namespace onlineStore.Migrations
                     b.Property<int>("FeatureId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
                     b.HasKey("RoleId", "FeatureId");
 
                     b.HasIndex("FeatureId");
@@ -133,6 +136,9 @@ namespace onlineStore.Migrations
 
                     b.Property<int>("FeatureId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
 
                     b.HasKey("UserId", "FeatureId");
 

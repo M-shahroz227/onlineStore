@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using onlineStore.Data;
+using onlineStore.Model;
 using onlineStore.Service.Interfaces;
 
 namespace onlineStore.Service.Implementations
@@ -13,27 +14,34 @@ namespace onlineStore.Service.Implementations
             _context = context;
         }
 
-        public async Task<bool> HasFeatureAsync(int userId, string featureCode)
+        public async Task<List<Feature>> GetAllAsync()
         {
-            // 1️⃣ Direct User Feature
-            bool userFeature = await _context.UserFeatures
-                .Include(x => x.Feature)
-                .AnyAsync(x =>
-                    x.UserId == userId &&
-                    x.Feature.Code == featureCode);
+            return await _context.Features.ToListAsync();
+        }
 
-            if (userFeature)
-                return true;
+        public async Task<Feature> CreateAsync(Feature feature)
+        {
+            var exists = await _context.Features
+                .AnyAsync(f => f.Code == feature.Code);
 
-            // 2️⃣ Role Based Feature
-            return await _context.UserRoles
-                .Include(x => x.Role)
-                    .ThenInclude(r => r.RoleFeatures)
-                        .ThenInclude(rf => rf.Feature)
-                .AnyAsync(x =>
-                    x.UserId == userId &&
-                    x.Role.RoleFeatures
-                        .Any(rf => rf.Feature.Code == featureCode));
+            if (exists)
+                throw new Exception("Feature already exists");
+
+            _context.Features.Add(feature);
+            await _context.SaveChangesAsync();
+
+            return feature;
+        }
+
+
+        public async Task ToggleAsync(int featureId)
+        {
+            var feature = await _context.Features.FindAsync(featureId);
+            if (feature == null)
+                throw new Exception("Feature not found");
+
+            
+            await _context.SaveChangesAsync();
         }
     }
 }

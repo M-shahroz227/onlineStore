@@ -1,29 +1,53 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using onlineStore.Authorization;
 using onlineStore.Data;
+using onlineStore.Service.AuthService;
 using onlineStore.Service.Implementations;
 using onlineStore.Service.Interfaces;
 using onlineStore.Service.ProductService;
-
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =========================
+// DATABASE
+// =========================
 builder.Services.AddDbContext<StoreDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-// Add services to the container.
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// =========================
+// SERVICES (DI)
+// =========================
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
-builder.Services.AddScoped<IFeatureService, FeatureService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-// jwt Authentication
+
+builder.Services.AddScoped<IFeatureService, FeatureService>();
+builder.Services.AddScoped<IUserFeatureService, UserFeatureService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+// =========================
+// AUTHORIZATION (FEATURE BASED)
+// =========================
+builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
+
+builder.Services.AddAuthorization();
+// no hardcoded policies here
+// ✔ FeatureAuthorizeAttribute + FeatureAuthorizationHandler handle everything
+
+// =========================
+// JWT AUTHENTICATION
+// =========================
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -31,31 +55,25 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("ThisIsASecretKeyForJwtTokenGeneration")),
+        IssuerSigningKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes("ThisIsASecretKeyForJwtTokenGeneration")),
         ClockSkew = TimeSpan.Zero
-
     };
 });
-// features base policies
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("PRODUCT_READ",
-        policy => policy.Requirements.Add(
-            new FeatureRequirement("PRODUCT_READ")));
 
-    options.AddPolicy("PRODUCT_WRITE",
-        policy => policy.Requirements.Add(
-            new FeatureRequirement("PRODUCT_WRITE")));
-});
-
+// =========================
+// MVC + SWAGGER
+// =========================
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// =========================
+// HTTP PIPELINE
+// =========================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -64,6 +82,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// ⚠️ ORDER IS VERY IMPORTANT
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

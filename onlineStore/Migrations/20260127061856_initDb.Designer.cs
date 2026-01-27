@@ -11,8 +11,8 @@ using onlineStore.Data;
 namespace onlineStore.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20260123123015_InitDb")]
-    partial class InitDb
+    [Migration("20260127061856_initDb")]
+    partial class initDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,6 +122,9 @@ namespace onlineStore.Migrations
                     b.Property<int>("FeatureId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
                     b.HasKey("RoleId", "FeatureId");
 
                     b.HasIndex("FeatureId");
@@ -136,6 +139,9 @@ namespace onlineStore.Migrations
 
                     b.Property<int>("FeatureId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
 
                     b.HasKey("UserId", "FeatureId");
 
