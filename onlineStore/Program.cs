@@ -14,6 +14,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // =========================
+// CONFIGURATION
+// =========================
+var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret")
+                ?? "ThisIsASecretKeyForJwtTokenGeneration";
+
+// =========================
 // DATABASE
 // =========================
 builder.Services.AddDbContext<StoreDbContext>(options =>
@@ -21,7 +27,7 @@ builder.Services.AddDbContext<StoreDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // =========================
-// SERVICES (DI)
+// DEPENDENCY INJECTION
 // =========================
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -32,26 +38,12 @@ builder.Services.AddScoped<IUserFeatureService, UserFeatureService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // =========================
-// AUTHORIZATION (FEATURE BASED)
+// FEATURE-BASED AUTHORIZATION
 // =========================
 builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, FeaturePolicyProvider>();
 
 builder.Services.AddAuthorization();
-
-var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider
-        .GetRequiredService<StoreDbContext>();
-
-    FeatureSeeder.Seed(context);
-}
-
-// no hardcoded policies here
-// ✔ FeatureAuthorizeAttribute + FeatureAuthorizationHandler handle everything
-
 
 // =========================
 // JWT AUTHENTICATION
@@ -65,23 +57,60 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = false, // set true in production
+        ValidateAudience = false, // set true in production
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey =
-            new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes("ThisIsASecretKeyForJwtTokenGeneration")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
         ClockSkew = TimeSpan.Zero
     };
 });
 
 // =========================
-// MVC + SWAGGER
+// CONTROLLERS + SWAGGER
 // =========================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Add JWT Bearer support in Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using Bearer scheme. Example: 'Bearer {token}'",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
+
+// =========================
+// BUILD APP
+// =========================
+var app = builder.Build();
+
+// =========================
+// SEED FEATURES
+// =========================
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<StoreDbContext>();
+    FeatureSeeder.Seed(context);
+}
 
 // =========================
 // HTTP PIPELINE
@@ -94,8 +123,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ⚠️ ORDER IS VERY IMPORTANT
-app.UseAuthentication();
+app.UseAuthentication(); // ⚠️ Must come BEFORE UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();
