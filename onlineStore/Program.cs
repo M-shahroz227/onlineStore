@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using onlineStore.Authorization;
 using onlineStore.Data;
+using onlineStore.Data.Seed;
 using onlineStore.Service.AuthService;
 using onlineStore.Service.Implementations;
 using onlineStore.Service.Interfaces;
@@ -34,10 +35,23 @@ builder.Services.AddScoped<IUserService, UserService>();
 // AUTHORIZATION (FEATURE BASED)
 // =========================
 builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, FeaturePolicyProvider>();
 
 builder.Services.AddAuthorization();
+
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<StoreDbContext>();
+
+    FeatureSeeder.Seed(context);
+}
+
 // no hardcoded policies here
 // ✔ FeatureAuthorizeAttribute + FeatureAuthorizationHandler handle everything
+
 
 // =========================
 // JWT AUTHENTICATION
@@ -68,8 +82,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
 
 // =========================
 // HTTP PIPELINE

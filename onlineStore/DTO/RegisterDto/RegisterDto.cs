@@ -8,7 +8,6 @@
         public string? PhoneNumber { get; set; }    
         public string Role { get; set; } = "User";  
 
-        // Add Features list for assigning feature-based authorization
-        public List<string> Features { get; set; } = new List<string>();
+        
     }
 }

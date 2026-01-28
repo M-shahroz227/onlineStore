@@ -11,8 +11,8 @@ using onlineStore.Data;
 namespace onlineStore.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20260127061856_initDb")]
-    partial class initDb
+    [Migration("20260128112736_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,6 +62,13 @@ namespace onlineStore.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -168,7 +175,7 @@ namespace onlineStore.Migrations
             modelBuilder.Entity("onlineStore.Model.RoleFeature", b =>
                 {
                     b.HasOne("onlineStore.Model.Feature", "Feature")
-                        .WithMany("RoleFeatures")
+                        .WithMany()
                         .HasForeignKey("FeatureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -187,7 +194,7 @@ namespace onlineStore.Migrations
             modelBuilder.Entity("onlineStore.Model.UserFeature", b =>
                 {
                     b.HasOne("onlineStore.Model.Feature", "Feature")
-                        .WithMany("UserFeatures")
+                        .WithMany()
                         .HasForeignKey("FeatureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -227,13 +234,6 @@ namespace onlineStore.Migrations
                     b.Navigation("UserFeatures");
 
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("onlineStore.Model.Feature", b =>
-                {
-                    b.Navigation("RoleFeatures");
-
-                    b.Navigation("UserFeatures");
                 });
 
             modelBuilder.Entity("onlineStore.Model.Role", b =>
