@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using onlineStore.DTO.ProductDto;
 using onlineStore.Service.ProductService;
-using onlineStore.Authorization; // FeatureAuthorize attribute
+using onlineStore.Authorization;
+using onlineStore.Common; // FeatureAuthorize attribute
 
 namespace onlineStore.Controllers
 {
@@ -17,16 +18,16 @@ namespace onlineStore.Controllers
         }
 
         // -------------------- READ ALL --------------------
-        [FeatureAuthorize("PRODUCT_READ")]
+        [FeatureAuthorize(AppFeatures.PRODUCT_VIEW)]
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(); 
             return Ok(products);
         }
 
         // -------------------- READ BY ID --------------------
-        [FeatureAuthorize("PRODUCT_READ")]
+        [FeatureAuthorize(AppFeatures.PRODUCT_VIEW)]
         [HttpGet("getById/{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {
@@ -38,7 +39,7 @@ namespace onlineStore.Controllers
         }
 
         // -------------------- CREATE --------------------
-        [FeatureAuthorize("PRODUCT_WRITE")]
+        [FeatureAuthorize(AppFeatures.PRODUCT_CREATE)]
         [HttpPost("add")]
         public async Task<ActionResult<ProductDto>> AddProduct([FromBody] ProductDto productDto)
         {
@@ -55,7 +56,7 @@ namespace onlineStore.Controllers
         }
 
         // -------------------- UPDATE --------------------
-        [FeatureAuthorize("PRODUCT_WRITE")]
+        [FeatureAuthorize(AppFeatures.PRODUCT_CREATE)]
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
@@ -68,7 +69,7 @@ namespace onlineStore.Controllers
         }
 
         // -------------------- DELETE --------------------
-        [FeatureAuthorize("PRODUCT_WRITE")]
+        [FeatureAuthorize(AppFeatures.PRODUCT_DELETE)]
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {

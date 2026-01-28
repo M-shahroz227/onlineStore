@@ -31,6 +31,7 @@ namespace onlineStore.Service.AuthService
                 UserName = dto.Username,
                 PasswordHash = dto.Password,
                 Role = dto.Role,
+                UserFeatures = new List<UserFeature>()
 
             };
 

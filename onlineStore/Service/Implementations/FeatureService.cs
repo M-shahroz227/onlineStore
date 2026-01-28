@@ -18,30 +18,6 @@ namespace onlineStore.Service.Implementations
         {
             return await _context.Features.ToListAsync();
         }
-
-        public async Task<Feature> CreateAsync(Feature feature)
-        {
-            var exists = await _context.Features
-                .AnyAsync(f => f.Code == feature.Code);
-
-            if (exists)
-                throw new Exception("Feature already exists");
-
-            _context.Features.Add(feature);
-            await _context.SaveChangesAsync();
-
-            return feature;
-        }
-
-
-        public async Task ToggleAsync(int featureId)
-        {
-            var feature = await _context.Features.FindAsync(featureId);
-            if (feature == null)
-                throw new Exception("Feature not found");
-
-            
-            await _context.SaveChangesAsync();
-        }
+        
     }
 }

@@ -4,7 +4,7 @@ using onlineStore.Service.Interfaces;
 
 [ApiController]
 [Route("api/users")]
-[Authorize(Roles = "Manager")]
+
 public class UserController : ControllerBase
 {
     private readonly IUserService _service;

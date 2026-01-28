@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using onlineStore.Authorization;
+using onlineStore.Common;
 using onlineStore.Data;
 using onlineStore.Data.Seed;
 using onlineStore.Service.AuthService;
@@ -23,8 +24,7 @@ var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret")
 // DATABASE
 // =========================
 builder.Services.AddDbContext<StoreDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // =========================
 // DEPENDENCY INJECTION
@@ -41,9 +41,23 @@ builder.Services.AddScoped<IUserService, UserService>();
 // FEATURE-BASED AUTHORIZATION
 // =========================
 builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, FeaturePolicyProvider>();
 
-builder.Services.AddAuthorization();
+// Dynamically register feature policies from AppFeatures
+builder.Services.AddAuthorization(options =>
+{
+    var featureNames = new[]
+    {
+        AppFeatures.PRODUCT_VIEW,
+        AppFeatures.PRODUCT_CREATE,
+        AppFeatures.PRODUCT_DELETE
+    };
+
+    foreach (var feature in featureNames)
+    {
+        options.AddPolicy($"Feature.{feature}", policy =>
+            policy.Requirements.Add(new FeatureRequirement(feature)));
+    }
+});
 
 // =========================
 // JWT AUTHENTICATION
