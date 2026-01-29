@@ -8,5 +8,6 @@ public class User
     public string Role { get; set; }
 
     public ICollection<UserRole> UserRoles { get; set; }
+    public ICollection<Feature> features { get; set; }  
     public ICollection<UserFeature> UserFeatures { get; set; }
 }

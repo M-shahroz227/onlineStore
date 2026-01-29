@@ -18,19 +18,22 @@ namespace onlineStore.Service.Implementations
 
         public string GenerateToken(User user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Role, user.Role) 
+                new Claim("UserId", user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName)
             };
 
+            // 🔥 FEATURE CLAIMS
+            foreach (var feature in user.features)
+            {
+                claims.Add(new Claim("feature", feature.Code));
+            }
+
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+                Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]));
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials:

@@ -5,8 +5,8 @@
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public ICollection<UserRole> UserRoles { get; set; }
-        public ICollection<RoleFeature> RoleFeatures { get; set; }
+        // ✅ REQUIRED
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public ICollection<RoleFeature> RoleFeatures { get; set; } = new List<RoleFeature>();
     }
-
 }

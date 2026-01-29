@@ -6,7 +6,8 @@ namespace onlineStore.Authorization
     {
         public FeatureAuthorizeAttribute(string featureCode)
         {
-            Policy = featureCode;
+            Policy = $"Feature.{featureCode}"; // ✅ FIX
+
         }
     }
 }

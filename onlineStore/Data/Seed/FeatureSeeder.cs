@@ -1,67 +1,135 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
-using onlineStore.Authorization;
-using onlineStore.Common;
+﻿using onlineStore.Data;
 using onlineStore.Model;
-using AppFeatures = onlineStore.Common.AppFeatures;
+using System.Linq;
 
-namespace onlineStore.Data.Seed
+public static class DataSeeder
 {
-    public static class FeatureSeeder
+    public static void Seed(StoreDbContext context)
     {
-        // Seed features into the database
-        public static void Seed(StoreDbContext context)
+        // =========================
+        // 1️⃣ FEATURES
+        // =========================
+        if (!context.Features.Any())
         {
-            if (context.Features.Any())
-                return;
-
-            var features = new[]
-            {
-                new Feature
-                {
-                    Code = AppFeatures.PRODUCT_VIEW,
-                    Name = "View Products",
-                    Description = "Allows viewing of products",
-                    IsActive = true
-                },
-                new Feature
-                {
-                    Code = AppFeatures.PRODUCT_CREATE,
-                    Name = "Create Product",
-                    Description = "Allows creation of new products",
-                    IsActive = true
-                },
-                new Feature
-                {
-                    Code = AppFeatures.PRODUCT_DELETE,
-                    Name = "Delete Product",
-                    Description = "Allows deletion of products",
-                    IsActive = false
-                }
-            };
-
-            context.Features.AddRange(features);
+            context.Features.AddRange(
+                new Feature { Code = "PRODUCT_VIEW", Name = "View Products", IsActive = true },
+                new Feature { Code = "PRODUCT_CREATE", Name = "Create Product", IsActive = true },
+                new Feature { Code = "PRODUCT_UPDATE", Name = "Update Product", IsActive = true },
+                new Feature { Code = "PRODUCT_DELETE", Name = "Delete Product", IsActive = true }
+            );
             context.SaveChanges();
         }
 
-        // Optional: register feature-based authorization policies dynamically
-        public static void RegisterFeaturePolicies(IServiceCollection services)
+        // =========================
+        // 2️⃣ ROLES
+        // =========================
+        if (!context.Roles.Any())
         {
-            services.AddAuthorization(options =>
-            {
-                var featureNames = new[]
-                {
-                    AppFeatures.PRODUCT_VIEW,
-                    AppFeatures.PRODUCT_CREATE,
-                    AppFeatures.PRODUCT_DELETE
-                };
+            context.Roles.AddRange(
+                new Role { Name = "User" },
+                new Role { Name = "Manager" },
+                new Role { Name = "Admin" }
+            );
+            context.SaveChanges();
+        }
 
-                foreach (var feature in featureNames)
+        // =========================
+        // 3️⃣ USERS (WITH PASSWORD)
+        // =========================
+        if (!context.Users.Any())
+        {
+            context.Users.AddRange(
+                new User
                 {
-                    options.AddPolicy($"Feature.{feature}", policy =>
-                        policy.Requirements.Add(new FeatureRequirement(feature)));
+                    UserName = "user",
+                    PasswordHash = PasswordHelper.Hash("User@123")
+                },
+                new User
+                {
+                    UserName = "manager",
+                    PasswordHash = PasswordHelper.Hash("Manager@123")
+                },
+                new User
+                {
+                    UserName = "admin",
+                    PasswordHash = PasswordHelper.Hash("Admin@123")
                 }
-            });
+            );
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error seeding users: " + ex.Message);
+            }
+
+            // =========================
+            // 4️⃣ FETCH ENTITIES
+            // =========================
+            var userRole = context.Roles.First(r => r.Name == "User");
+            var managerRole = context.Roles.First(r => r.Name == "Manager");
+            var adminRole = context.Roles.First(r => r.Name == "Admin");
+
+            var user = context.Users.First(u => u.UserName == "user");
+            var manager = context.Users.First(u => u.UserName == "manager");
+            var admin = context.Users.First(u => u.UserName == "admin");
+
+            var view = context.Features.First(f => f.Code == "PRODUCT_VIEW");
+            var create = context.Features.First(f => f.Code == "PRODUCT_CREATE");
+            var update = context.Features.First(f => f.Code == "PRODUCT_UPDATE");
+            var delete = context.Features.First(f => f.Code == "PRODUCT_DELETE");
+
+            // =========================
+            // 5️⃣ USER ↔ ROLE
+            // =========================
+            if (!context.UserRoles.Any())
+            {
+                context.UserRoles.AddRange(
+                    new UserRole { UserId = user.Id, RoleId = userRole.Id },
+                    new UserRole { UserId = manager.Id, RoleId = managerRole.Id },
+                    new UserRole { UserId = admin.Id, RoleId = adminRole.Id }
+                );
+                context.SaveChanges();
+            }
+
+            // =========================
+            // 6️⃣ ROLE ↔ FEATURE
+            // =========================
+            if (!context.RoleFeatures.Any())
+            {
+                context.RoleFeatures.AddRange(
+                    // User
+                    new RoleFeature { RoleId = userRole.Id, FeatureId = view.Id },
+
+                    // Manager
+                    new RoleFeature { RoleId = managerRole.Id, FeatureId = view.Id },
+                    new RoleFeature { RoleId = managerRole.Id, FeatureId = create.Id },
+                    new RoleFeature { RoleId = managerRole.Id, FeatureId = update.Id },
+
+                    // Admin
+                    new RoleFeature { RoleId = adminRole.Id, FeatureId = view.Id },
+                    new RoleFeature { RoleId = adminRole.Id, FeatureId = create.Id },
+                    new RoleFeature { RoleId = adminRole.Id, FeatureId = update.Id },
+                    new RoleFeature { RoleId = adminRole.Id, FeatureId = delete.Id }
+                );
+                context.SaveChanges();
+            }
+
+            // =========================
+            // 7️⃣ USER ↔ FEATURE (OVERRIDE)
+            // =========================
+            if (!context.UserFeatures.Any())
+            {
+                context.UserFeatures.Add(
+                    new UserFeature
+                    {
+                        UserId = manager.Id,
+                        FeatureId = delete.Id // Manager extra permission
+                    }
+                );
+                context.SaveChanges();
+            }
         }
     }
 }

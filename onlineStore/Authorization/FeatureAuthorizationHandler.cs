@@ -19,40 +19,23 @@ namespace onlineStore.Authorization
             AuthorizationHandlerContext context,
             FeatureRequirement requirement)
         {
-            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) return;
+            var userIdClaim = context.User.FindFirst("UserId");
+            if (userIdClaim == null)
+                return;
 
             int userId = int.Parse(userIdClaim.Value);
 
-            // ✅ USER FEATURE CHECK
-            bool hasUserFeature = await _context.UserFeatures
-                .Include(x => x.Feature)
-                .AnyAsync(x =>
-                    x.UserId == userId &&
-                    x.Feature.Code == requirement.FeatureCode &&
-                    x.IsEnabled);
+            bool allowed = await _context.UserFeatures
+           .AnyAsync(uf =>
+             uf.UserId == userId &&
+             uf.Feature.Code == requirement.Feature &&
+             uf.Feature.IsActive);
 
-            if (hasUserFeature)
+
+            if (allowed)
             {
                 context.Succeed(requirement);
-                return;
             }
-
-            // ✅ ROLE FEATURE CHECK
-            var roles = context.User.FindAll(ClaimTypes.Role)
-                .Select(r => r.Value)
-                .ToList();
-
-            bool hasRoleFeature = await _context.RoleFeatures
-                .Include(x => x.Feature)
-                .Include(x => x.Role)
-                .AnyAsync(x =>
-                    roles.Contains(x.Role.Name) &&
-                    x.Feature.Code == requirement.FeatureCode &&
-                    x.IsEnabled);
-
-            if (hasRoleFeature)
-                context.Succeed(requirement);
         }
     }
 }

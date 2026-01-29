@@ -3,11 +3,10 @@
     public class UserFeature
     {
         public int UserId { get; set; }
-        public User User { get; set; } = null!;
+        public User User { get; set; }
 
         public int FeatureId { get; set; }
-        public Feature Feature { get; set; } = null!;
-
-        public bool IsEnabled { get; set; } = true; // 🔥 CONTROL HERE
+        public Feature Feature { get; set; }
     }
+
 }

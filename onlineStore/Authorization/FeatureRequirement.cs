@@ -4,11 +4,12 @@ namespace onlineStore.Authorization
 {
     public class FeatureRequirement : IAuthorizationRequirement
     {
-        public string FeatureCode { get; }
+        
+        public string Feature { get; internal set; }
 
         public FeatureRequirement(string featureCode)
         {
-            FeatureCode = featureCode;
+            Feature = featureCode;
         }
     }
 }
