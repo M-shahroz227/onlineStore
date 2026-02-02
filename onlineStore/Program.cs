@@ -39,6 +39,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Register handler
 builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
 
+// filter Registration
+builder.Services.AddScoped<ValidationFilter>();
+builder.Services.AddScoped<ProductResourceFilter>();
+builder.Services.AddScoped<ProductResultFilter>();
+
+// Exception filter global
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
+
 // =========================
 // JWT AUTHENTICATION
 // =========================

@@ -8,6 +8,10 @@ namespace onlineStore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ServiceFilter(typeof(ValidationFilter))]
+    [ServiceFilter(typeof(ProductResourceFilter))]
+    [ServiceFilter(typeof(ProductResultFilter))]
+    
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
