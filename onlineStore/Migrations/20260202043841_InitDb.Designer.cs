@@ -12,7 +12,7 @@ using onlineStore.Data;
 namespace onlineStore.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20260129141602_InitDb")]
+    [Migration("20260202043841_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -34,10 +34,6 @@ namespace onlineStore.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -97,7 +93,7 @@ namespace onlineStore.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
-                    b.Property<string>("Tile")
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

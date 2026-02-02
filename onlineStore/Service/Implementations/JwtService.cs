@@ -19,25 +19,30 @@ namespace onlineStore.Service.Implementations
         public string GenerateToken(User user)
         {
             var claims = new List<Claim>
-            {
-                new Claim("UserId", user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.UserName)
-            };
+{
+           new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName)
+};
 
-            // 🔥 FEATURE CLAIMS
-            foreach (var feature in user.features)
+
+            // 🔥 Add user features as claims
+            if (user.UserFeatures != null)
             {
-                claims.Add(new Claim("feature", feature.Code));
+                foreach (var uf in user.UserFeatures)
+                {
+                    if (uf.Feature != null && !string.IsNullOrEmpty(uf.Feature.Code))
+                        claims.Add(new Claim("feature", uf.Feature.Code));
+                }
             }
 
+            // 🔑 Key
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]));
 
             var token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials:
-                    new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

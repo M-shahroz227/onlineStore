@@ -2,7 +2,7 @@
 using onlineStore.DTO.ProductDto;
 using onlineStore.Service.ProductService;
 using onlineStore.Authorization;
-using onlineStore.Common; // FeatureAuthorize attribute
+using onlineStore.Common;
 
 namespace onlineStore.Controllers
 {
@@ -22,7 +22,7 @@ namespace onlineStore.Controllers
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
-            var products = await _productService.GetAllProductsAsync(); 
+            var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
 
@@ -56,7 +56,7 @@ namespace onlineStore.Controllers
         }
 
         // -------------------- UPDATE --------------------
-        [FeatureAuthorize(AppFeatures.PRODUCT_CREATE)]
+        [FeatureAuthorize(AppFeatures.PRODUCT_UPDATE)] // ✅ fix here
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ProductDto>> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {

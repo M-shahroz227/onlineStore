@@ -22,48 +22,67 @@ namespace onlineStore.Service.AuthService
         // -------------------- REGISTER --------------------
         public async Task<bool> RegisterUserAsync(RegisterDto dto)
         {
-            // Check if username exists
+            // Username already exists
             if (await _context.Users.AnyAsync(u => u.UserName == dto.Username))
                 return false;
 
             var user = new User
             {
                 UserName = dto.Username,
-                PasswordHash = dto.Password,
-                Role = dto.Role,
-                UserFeatures = new List<UserFeature>()
-
+                PasswordHash = PasswordHelper.Hash(dto.Password)
             };
-
-            // Add features
-            var features = await _context.Features.ToListAsync();
-            foreach (var feature in features)
-            {
-                user.UserFeatures.Add(new UserFeature { Feature = feature});
-            }
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            // 🔹 Assign default role (User)
+            var userRole = await _context.Roles.FirstAsync(r => r.Name == dto.Username);
+            _context.UserRoles.Add(new UserRole
+            {
+                UserId = user.Id,
+                RoleId = userRole.Id
+            });
+
+            // 🔹 Assign features via role
+            var roleFeatures = await _context.RoleFeatures
+                .Where(rf => rf.RoleId == userRole.Id)
+                .ToListAsync();
+
+            foreach (var rf in roleFeatures)
+            {
+                _context.UserFeatures.Add(new UserFeature
+                {
+                    UserId = user.Id,
+                    FeatureId = rf.FeatureId
+                });
+            }
+
+            await _context.SaveChangesAsync();
             return true;
         }
+
 
         // -------------------- LOGIN --------------------
         public async Task<string> LoginUserAsync(LoginDto dto)
         {
             var user = await _context.Users
                 .Include(u => u.UserFeatures)
-                .FirstOrDefaultAsync(u => u.UserName == dto.Username && u.PasswordHash == dto.password);
+                    .ThenInclude(uf => uf.Feature)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserName == dto.Username);
 
-            if (user == null) return null;
+            if (user == null)
+                return null;
 
-            // Extract feature names
-            var features = user.UserFeatures.Select(f => f.Feature).ToList();
+            // 🔐 Correct password check
+            if (!PasswordHelper.Verify(dto.password, user.PasswordHash))
+                return null;
 
             // Generate JWT
             var token = _jwtService.GenerateToken(user);
-
             return token;
         }
+
     }
 }

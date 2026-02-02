@@ -24,7 +24,7 @@ namespace onlineStore.Service.ProductService
                 .Select(p => new ProductDto
                 {
                     Id = p.Id,
-                    Tile = p.Tile,
+                    Tile = p.Title,
                     Price = p.Price,
                     Stock = p.Stock,
                     Description = p.Description
@@ -41,7 +41,7 @@ namespace onlineStore.Service.ProductService
             return new ProductDto
             {
                 Id = product.Id,
-                Tile = product.Tile,
+                Tile = product.Title,
                 Price = product.Price,
                 Stock = product.Stock,
                 Description = product.Description
@@ -53,7 +53,7 @@ namespace onlineStore.Service.ProductService
         {
             var product = new Product
             {
-                Tile = productDto.Tile,
+                Title = productDto.Tile,
                 Price = productDto.Price,
                 Stock = productDto.Stock,
                 Description = productDto.Description
@@ -72,7 +72,7 @@ namespace onlineStore.Service.ProductService
             var product = await _context.Products.FindAsync(id);
             if (product == null) return null;
 
-            product.Tile = productDto.Tile;
+            product.Title = productDto.Tile;
             product.Price = productDto.Price;
             product.Stock = productDto.Stock;
             product.Description = productDto.Description;

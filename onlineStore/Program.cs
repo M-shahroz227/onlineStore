@@ -9,6 +9,7 @@ using onlineStore.Service.AuthService;
 using onlineStore.Service.Implementations;
 using onlineStore.Service.Interfaces;
 using onlineStore.Service.ProductService;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 // =========================
 // CONFIGURATION
 // =========================
-var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret")
-                ?? "ThisIsASecretKeyForJwtTokenGeneration";
+var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret");
+               
 
 // =========================
 // DATABASE CONTEXT
@@ -35,31 +36,17 @@ builder.Services.AddScoped<IFeatureService, FeatureService>();
 builder.Services.AddScoped<IUserFeatureService, UserFeatureService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// =========================
-// FEATURE-BASED AUTHORIZATION
-// =========================
 // Register handler
 builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>();
-
-// Configure feature policies
-builder.Services.AddAuthorization(options =>
-{
-    var featureNames = new[] { "PRODUCT_VIEW", "PRODUCT_CREATE", "PRODUCT_DELETE" };
-    foreach (var feature in featureNames)
-    {
-        options.AddPolicy($"Feature:{feature}", policy =>
-            policy.Requirements.Add(new FeatureRequirement(feature)));
-    }
-});
 
 // =========================
 // JWT AUTHENTICATION
 // =========================
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -68,13 +55,36 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        IssuerSigningKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSecret)),
         ClockSkew = TimeSpan.Zero
     };
 });
 
 // =========================
+// FEATURE-BASED AUTHORIZATION
+// =========================
+
+
+// Configure feature policies
+builder.Services.AddAuthorization(options =>
+{
+    var featureNames = new[] { "PRODUCT_VIEW", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE" };
+    foreach (var feature in featureNames)
+    {
+        // Change colon to dot
+        options.AddPolicy($"Feature.{feature}", policy =>
+            policy.Requirements.Add(new FeatureRequirement(feature)));
+    }
+});
+
+
+
+
+// =========================
 // CONTROLLERS + SWAGGER
+
 // =========================
 builder.Services.AddControllers(options =>
 {

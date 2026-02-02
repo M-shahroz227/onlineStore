@@ -19,22 +19,40 @@ namespace onlineStore.Authorization
             AuthorizationHandlerContext context,
             FeatureRequirement requirement)
         {
-            var userIdClaim = context.User.FindFirst("UserId");
+            Console.WriteLine("🔥 FeatureAuthorizationHandler CALLED");
+
+            // 1️⃣ Get UserId from JWT (standard claim)
+            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
+            {
+                Console.WriteLine("❌ UserId claim missing");
                 return;
+            }
 
-            int userId = int.Parse(userIdClaim.Value);
+            if (!int.TryParse(userIdClaim.Value, out int userId))
+            {
+                Console.WriteLine("❌ Invalid UserId claim");
+                return;
+            }
 
-            bool allowed = await _context.UserFeatures
-           .AnyAsync(uf =>
-             uf.UserId == userId &&
-             uf.Feature.Code == requirement.Feature &&
-             uf.Feature.IsActive);
+            // 2️⃣ Get user's features from DB safely
+            var allowed = await _context.UserFeatures
+                .Include(uf => uf.Feature)       // Important: load Feature
+                .AnyAsync(uf =>
+                    uf.UserId == userId &&
+                    uf.Feature != null &&          // null check
+                    uf.Feature.Code == requirement.Feature &&
+                    uf.Feature.IsActive);
 
-
+            // 3️⃣ Authorize if allowed
             if (allowed)
             {
+                Console.WriteLine($"✅ User {userId} authorized for {requirement.Feature}");
                 context.Succeed(requirement);
+            }
+            else
+            {
+                Console.WriteLine($"❌ User {userId} NOT authorized for {requirement.Feature}");
             }
         }
     }
