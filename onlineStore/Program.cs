@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using onlineStore.Authorization;
+using onlineStore.Common;
 using onlineStore.Data;
 using onlineStore.Filters.LogActionFilter;
 using onlineStore.Service.AuthService;
@@ -42,13 +43,10 @@ builder.Services.AddScoped<IAuthorizationHandler, FeatureAuthorizationHandler>()
 // filter Registration
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddScoped<ProductResourceFilter>();
-builder.Services.AddScoped<ProductResultFilter>();
 
-// Exception filter global
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<GlobalExceptionFilter>();
-});
+// chache memory registration
+builder.Services.AddMemoryCache();
+
 
 // =========================
 // JWT AUTHENTICATION
@@ -81,7 +79,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Configure feature policies
 builder.Services.AddAuthorization(options =>
 {
-    var featureNames = new[] { "PRODUCT_VIEW", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE" };
+    var featureNames = new[] { AppFeatures.PRODUCT_VIEW, AppFeatures.PRODUCT_CREATE, AppFeatures.PRODUCT_UPDATE, AppFeatures.PRODUCT_DELETE };
     foreach (var feature in featureNames)
     {
         // Change colon to dot
@@ -93,6 +91,8 @@ builder.Services.AddAuthorization(options =>
 
 
 
+
+
 // =========================
 // CONTROLLERS + SWAGGER
 
@@ -100,6 +100,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<LogActionFilter>();
+    options.Filters.Add<ValidationFilter>();
+    options.Filters.Add<GlobalExceptionFilter>();
+    
+    
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -143,7 +147,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // =========================
-// HTTP PIPELINE
+// HTTP PIPELIN
 // =========================
 if (app.Environment.IsDevelopment())
 {

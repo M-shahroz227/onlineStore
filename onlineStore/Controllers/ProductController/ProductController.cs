@@ -9,8 +9,7 @@ namespace onlineStore.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ServiceFilter(typeof(ValidationFilter))]
-    [ServiceFilter(typeof(ProductResourceFilter))]
-    [ServiceFilter(typeof(ProductResultFilter))]
+    
     
     public class ProductController : ControllerBase
     {
@@ -23,15 +22,18 @@ namespace onlineStore.Controllers
 
         // -------------------- READ ALL --------------------
         [FeatureAuthorize(AppFeatures.PRODUCT_VIEW)]
+        [ServiceFilter(typeof(ProductResourceFilter))]
         [HttpGet("getAll")]
         public async Task<ActionResult<List<ProductDto>>> GetAllProducts()
         {
+            
             var products = await _productService.GetAllProductsAsync();
             return Ok(products);
         }
 
         // -------------------- READ BY ID --------------------
         [FeatureAuthorize(AppFeatures.PRODUCT_VIEW)]
+        [ServiceFilter(typeof(ProductResourceFilter))]
         [HttpGet("getById/{id}")]
         public async Task<ActionResult<ProductDto>> GetProductById(int id)
         {

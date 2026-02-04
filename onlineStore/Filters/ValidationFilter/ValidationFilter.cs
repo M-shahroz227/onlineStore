@@ -5,14 +5,20 @@ public class ValidationFilter : IActionFilter
 {
     public void OnActionExecuting(ActionExecutingContext context)
     {
-        if (!context.ModelState.IsValid)
+        var user = context.HttpContext.User;
+        if (user != null) 
         {
-            context.Result = new BadRequestObjectResult(context.ModelState);
+            Console.WriteLine("this is a request send user information :"+user);
         }
+
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        // post-action logic (optional)
+        var user = context.HttpContext.User;
+        if (user != null) 
+        {
+            Console.WriteLine("this is a response receive user information"+user);
+        }
     }
 }

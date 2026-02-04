@@ -16,10 +16,10 @@ public static class DataSeeder
         if (!context.Features.Any())
         {
             context.Features.AddRange(
-                new Feature { Code = "PRODUCT_VIEW", Name = "View Products", IsActive = true },
-                new Feature { Code = "PRODUCT_CREATE", Name = "Create Product", IsActive = true },
-                new Feature { Code = "PRODUCT_UPDATE", Name = "Update Product", IsActive = true },
-                new Feature { Code = "PRODUCT_DELETE", Name = "Delete Product", IsActive = true }
+                new Feature { Code = AppFeatures.PRODUCT_VIEW, Name = "View Products", IsActive = true },
+                new Feature { Code = AppFeatures.PRODUCT_CREATE, Name = "Create Product", IsActive = true },
+                new Feature { Code = AppFeatures.PRODUCT_UPDATE, Name = "Update Product", IsActive = true },
+                new Feature { Code = AppFeatures.PRODUCT_DELETE, Name = "Delete Product", IsActive = true }
             );
             context.SaveChanges();
         }
